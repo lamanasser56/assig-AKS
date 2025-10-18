@@ -1,0 +1,24 @@
+# Node / app
+node_modules/
+dist/
+build/
+coverage/
+
+# Local env
+.env
+*.env
+
+# Docker
+*.log
+*.pid
+
+# Terraform
+**/.terraform/
+*.tfvars
+*.tfvars.json
+crash.log
+# نُبقي lockfile مسموح
+# **/.terraform.lock.hcl
+
+# VS Code
+.vscode/

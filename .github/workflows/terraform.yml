@@ -1,0 +1,69 @@
+name: Terraform (Plan & Apply with Azure Credentials)
+
+on:
+  pull_request:
+    paths: ["terraform/**"]
+  push:
+    branches: ["main"]
+    paths: ["terraform/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_VAR_sql_admin_password: ${{ secrets.TF_VAR_sql_admin_password }}
+
+jobs:
+  tf:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform   # تأكدي مجلد التيرا اسمه terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan (PR only)
+        if: github.event_name == 'pull_request'
+        run: terraform plan -out plan.out
+
+      - name: Upload Plan
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-plan
+          path: terraform/plan.out
+
+      - name: Terraform Apply (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve
+
+      - name: Export TF outputs (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform output -json > tf-outputs.json
+
+      - name: Upload outputs (artifact)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-outputs
+          path: terraform/tf-outputs.json

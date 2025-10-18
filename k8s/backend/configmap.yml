@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: shop-lama
+data:
+  # Server Config
+  PORT: "3001"
+  NODE_ENV: "production"
+  
+  # Database Config 
+  # لازم اغيره بعد الابلاي
+  DB_SERVER: "ecommerce-sqlserver-abc123.database.windows.net"
+  DB_NAME: "ecommerce-sqldb"
+  DB_ENCRYPT: "true"
+  DB_TRUST_SERVER_CERTIFICATE: "false"
+  DB_CONNECTION_TIMEOUT: "30000"
+  
+  # CORS (Ingress IP)---احط الابي 
+  CORS_ORIGIN: "http://"
+  
+  # Rate Limiting
+  RATE_LIMIT_WINDOW_MS: "900000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  
+  # JWT Config
+  JWT_EXPIRES_IN: "7d"
